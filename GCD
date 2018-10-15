@@ -1,0 +1,273 @@
+/
+
+//  ViewController.h
+
+//  GrandCentralDispatcher
+
+//
+
+//  Created by Sábado on 18/10/14.
+
+//  Copyright (c) 2014 RUI TOLEDO. All rights reserved.
+
+//
+
+ 
+
+#import <UIKit/UIKit.h>
+
+ 
+
+@interface ViewController : UIViewController
+
+ 
+
+ 
+
+// Outlet para nossa label
+
+@property (weak, nonatomic) IBOutletUILabel *labelContagem;
+
+ 
+
+ 
+
+// Action para nosso botão
+
+- (IBAction)iniciar:(UIButton *)sender;
+
+ 
+
+ 
+
+ 
+
+@end
+
+ 
+
+//
+
+//  ViewController.m
+
+//  GrandCentralDispatcher
+
+//
+
+//  Created by Sábado on 18/10/14.
+
+//  Copyright (c) 2014 RUI TOLEDO. All rights reserved.
+
+//
+
+ 
+
+#import "ViewController.h"
+
+ 
+
+@interfaceViewController ()
+
+ 
+
+@end
+
+ 
+
+@implementation ViewController
+
+ 
+
+- (void)viewDidLoad
+
+{
+
+    [superviewDidLoad];
+
+// Do any additional setup after loading the view, typically from a nib.
+
+}
+
+ 
+
+- (void)didReceiveMemoryWarning
+
+{
+
+    [superdidReceiveMemoryWarning];
+
+    // Dispose of any resources that can be recreated.
+
+}
+
+ 
+
+// Botão que trabalhará as interações
+
+- (IBAction)iniciar:(UIButton *)sender
+
+{
+
+    
+
+    
+
+    /* GCD - Grand Central Dispatcher
+
+     
+
+     Nos permite a utilização de recursos para subprocessamento.
+
+     Possui recursos para divisão de código em múltiplis núcleos.
+
+     
+
+     Terminologias
+
+     
+
+     queue: Fila de execução de tarefas
+
+     main_queue: Concentra os recursos principais do app (Ex: interface gráfica)
+
+     global_queue: Espaço reservado para processamentos secundários
+
+     
+
+     sync: Define uma execução síncrona que impede blocos simultâneos
+
+     
+
+     async: Define uma execução assímcrona, que permite blocos simultâneos
+
+    
+
+     */
+
+    
+
+    // Não é aconselhável chamar um subprocesso síncrono na Mainqueue. Isso cria uma espécia de DeadLock (trava a aplicação). Uma espera entre 2 ou mais processos que dependem entre si. Um processo espera o término do outro para ser executado e vice-versa. Desta forma, nenhum dos dois prosseguem e o App trava.
+
+    
+
+    /*
+
+     
+
+     // NÃO DEVEMOS FAZER DESTA FORMA
+
+     
+
+    dispatch_sync(dispatch_get_main_queue(), ^
+
+    {
+
+        for (int i=1; i<=10; i++)
+
+        {
+
+            NSLog(@"Processamento: %i",i);
+
+            
+
+            [NSThread sleepForTimeInterval:1.0];
+
+        }
+
+    }
+
+                  );
+
+    
+
+    */
+
+    
+
+ 
+
+    
+
+    
+
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^
+
+                  {
+
+                      for (int i=0; i<=10; i++)
+
+                      {
+
+                          NSLog(@"Processamento A = %i",i);
+
+                          
+
+                          
+
+                          //
+
+                          
+
+                          dispatch_async(dispatch_get_main_queue(), ^
+
+                          {
+
+                              self.labelContagem.text=[NSString stringWithFormat:@"%i",i];
+
+                          }
+
+                                         );
+
+                          
+
+                          //
+
+                          
+
+                          [NSThread sleepForTimeInterval:1.0];
+
+                      }
+
+                  }
+
+                  );
+
+    
+
+ 
+
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^
+
+                   {
+
+                       for (int i=0; i<=10; i++)
+
+                       {
+
+                           NSLog(@"Processamento B = %i",i);
+
+                           
+
+                           [NSThread sleepForTimeInterval:1.0];
+
+                       }
+
+                   }
+
+                   );
+
+ 
+
+    
+
+    
+
+    
+
+    
+
+}
+
+ 
+
+@end
